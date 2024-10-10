@@ -18,6 +18,7 @@ namespace Local
 	class Box 
 	{
 	public:
+		Local::VAO VAO;
 		Local::VBO VBO;
 		Local::EBO EBO;
 
@@ -25,8 +26,8 @@ namespace Local
 		Vec2f size;
 		Color color;
 
-		GLfloat* vertices();
-		GLuint* indices();
+		GLfloat vertices[24];
+		GLuint indices[6];
 
 		Box(Vec2f size, Vec2f pos);
 		~Box();

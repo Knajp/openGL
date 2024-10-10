@@ -2,6 +2,8 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include "Core.h"
+
 // Simple vertex and fragment shaders
 const char* vertexShaderSource = R"(
 #version 330 core
@@ -26,20 +28,8 @@ void main() {
 }
 )";
 
-// Manually specified rectangle vertices
-GLfloat vertices[] = {
-    // Positions        // Colors
-    -1.0f,  0.75f, 0.0f,  1.0f, 0.0f, 0.0f, // Bottom-left (moved upward)
-     1.0f,  0.75f, 0.0f,  0.0f, 1.0f, 0.0f, // Bottom-right (moved upward)
-    -1.0f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f, // Top-left (moved upward)
-     1.0f,  1.0f, 0.0f,  1.0f, 1.0f, 0.0f  // Top-right (moved upward)
-};
 
-// Indices for drawing two triangles to form a rectangle
-GLuint indices[] = {
-    0, 1, 2,  // First triangle
-    2, 1, 3   // Second triangle
-};
+
 
 // Error checking helper
 void checkOpenGLError(const std::string& location) {
@@ -51,13 +41,12 @@ void checkOpenGLError(const std::string& location) {
 
 int main() {
     // Initialize GLFW and create window
-    if (!glfwInit()) return -1;
+    GLFWwindow* window = Local::Init();
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Test Window", nullptr, nullptr);
     if (!window) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -72,65 +61,45 @@ int main() {
     }
 
     // Compile vertex shader
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-    glCompileShader(vertexShader);
+    Local::Shader vertexShader = Local::Shader(GL_VERTEX_SHADER);
+    vertexShader.ShaderSource(1, &vertexShaderSource, nullptr);
+    vertexShader.Compile();
 
     // Compile fragment shader
-    GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragShader, 1, &fragShaderSource, nullptr);
-    glCompileShader(fragShader);
+    Local::Shader fragShader = Local::Shader(GL_FRAGMENT_SHADER);
+    fragShader.ShaderSource(1, &fragShaderSource, nullptr);
+    fragShader.Compile();
 
     // Create shader program
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragShader);
-    glLinkProgram(shaderProgram);
+    Local::ShaderProgram shaderProgram = Local::ShaderProgram::ShaderProgram();
+    shaderProgram.attachShader(vertexShader.ID);
+    shaderProgram.attachShader(fragShader.ID);
+    shaderProgram.Link();
 
+    shaderProgram.Use();
     // Delete shaders after linking
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragShader);
+    vertexShader.Delete();
+    fragShader.Delete();
 
-    // Set up VAO, VBO, and EBO
-    GLuint VAO, VBO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    // Bind VAO
-    glBindVertexArray(VAO);
-
-    // Bind and fill VBO
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // Bind and fill EBO
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // Position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // Color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
-
-    // Unbind VAO (safe state)
-    glBindVertexArray(0);
-
+    Local::Box rect = Local::Box::Box({ 1.0f,0.1f }, { -0.5f, -0.05f });
+    Local::Box rect2 = Local::Box::Box({ 0.1f, 1.0f }, { -0.05f, -0.5f });
+    Local::Box rect3 = Local::Box::Box({ 0.1f, 0.45f }, { -0.5f, 0.05f });
+    Local::Box rect4 = Local::Box::Box({ 0.1f, 0.45f }, { 0.4f, -0.5f });
+    Local::Box rect5 = Local::Box::Box({ 0.45f, 0.1f }, { 0.05f, 0.4f });
+    Local::Box rect6 = Local::Box::Box({ 0.45f, 0.1f }, { -0.5f, -0.5f });
     // Render loop
     while (!glfwWindowShouldClose(window)) {
         // Clear the screen
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Use shader program
-        glUseProgram(shaderProgram);
-
-        // Bind VAO and draw
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        rect.Draw();
+        rect2.Draw();
+        rect3.Draw();
+        rect4.Draw();
+        rect5.Draw();
+        rect6.Draw();
+        checkOpenGLError("Drawing rect");
 
         // Swap buffers and poll events
         glfwSwapBuffers(window);
@@ -138,10 +107,8 @@ int main() {
     }
 
     // Clean up
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shaderProgram);
+
+    shaderProgram.Delete();
 
     glfwTerminate();
     return 0;

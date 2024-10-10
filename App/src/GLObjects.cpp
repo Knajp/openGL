@@ -69,7 +69,7 @@ GLFWwindow* Local::Init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 800, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -83,7 +83,7 @@ GLFWwindow* Local::Init()
         std::cout << "Failed to initialize GLAD" << std::endl;
 
     }
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, 800, 800);
 
     return window;
 }
