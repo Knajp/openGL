@@ -26,10 +26,13 @@ namespace Local
 		Vec2f size;
 		Color color;
 
+		std::string Name;
+
 		GLfloat vertices[24];
 		GLuint indices[6];
 
-		Box(Vec2f size, Vec2f pos);
+		Box(Vec2f size, Vec2f pos, Color color);
+		Box(Vec2f size, Vec2f pos, Color color, std::string Name);
 		~Box();
 
 		void Draw();

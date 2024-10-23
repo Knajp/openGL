@@ -28,7 +28,8 @@ void main() {
 }
 )";
 
-
+double NormalizeYCoordinate(double coordinate) { return 1 - (2 * coordinate) / 800; }
+double NormalizeXCoordinate(double coordinate) { return (2 * coordinate) / 800 - 1; }
 
 
 // Error checking helper
@@ -81,26 +82,79 @@ int main() {
     vertexShader.Delete();
     fragShader.Delete();
 
-    Local::Box rect = Local::Box::Box({ 1.0f,0.1f }, { -0.5f, -0.05f });
-    Local::Box rect2 = Local::Box::Box({ 0.1f, 1.0f }, { -0.05f, -0.5f });
-    Local::Box rect3 = Local::Box::Box({ 0.1f, 0.45f }, { -0.5f, 0.05f });
-    Local::Box rect4 = Local::Box::Box({ 0.1f, 0.45f }, { 0.4f, -0.5f });
-    Local::Box rect5 = Local::Box::Box({ 0.45f, 0.1f }, { 0.05f, 0.4f });
-    Local::Box rect6 = Local::Box::Box({ 0.45f, 0.1f }, { -0.5f, -0.5f });
+    Local::Box rect = Local::Box::Box({ 2.0f, 0.3f }, { -1.0f, 0.7f }, {0.5f, 0.5f, 0.5f});
+    Local::Box rect2 = Local::Box::Box({ 0.5f, 1.7f }, { -1.0f, -1.0f }, { 0.7f, 0.7f, 0.7f });
+
+    Local::Box button1 = Local::Box::Box({ 0.25f, 0.25f }, { -0.3f, 0.2f }, { 0.5f, 0.5f, 0.5f }, "1");
+    Local::Box button2 = Local::Box::Box({ 0.25f, 0.25f }, {  0.0f, 0.2f }, { 0.5f, 0.5f, 0.5f }, "2");
+    Local::Box button3 = Local::Box::Box({ 0.25f, 0.25f }, {  0.3f, 0.2f }, { 0.5f, 0.5f, 0.5f }, "3");
+    Local::Box button4 = Local::Box::Box({ 0.25f, 0.25f }, {  0.6f, 0.2f }, { 0.5f, 0.5f, 0.5f }, "+");
+
+    Local::Box button5 = Local::Box::Box({ 0.25f, 0.25f }, { -0.3f, -0.1f }, { 0.5f, 0.5f, 0.5f }, "4");
+    Local::Box button6 = Local::Box::Box({ 0.25f, 0.25f }, {  0.0f, -0.1f }, { 0.5f, 0.5f, 0.5f }, "5");
+    Local::Box button7 = Local::Box::Box({ 0.25f, 0.25f }, {  0.3f, -0.1f }, { 0.5f, 0.5f, 0.5f }, "6");
+    Local::Box button8 = Local::Box::Box({ 0.25f, 0.25f }, {  0.6f, -0.1f }, { 0.5f, 0.5f, 0.5f }, "-");
+
+    Local::Box button9 = Local::Box::Box({ 0.25f, 0.25f }, { -0.3f, -0.4f }, { 0.5f, 0.5f, 0.5f }," 7");
+    Local::Box button10 = Local::Box::Box({ 0.25f, 0.25f }, { 0.0f, -0.4f }, { 0.5f, 0.5f, 0.5f }, "8");
+    Local::Box button11 = Local::Box::Box({ 0.25f, 0.25f }, { 0.3f, -0.4f }, { 0.5f, 0.5f, 0.5f }, "9");
+    Local::Box button12 = Local::Box::Box({ 0.25f, 0.25f }, { 0.6f, -0.4f }, { 0.5f, 0.5f, 0.5f }, "*");
+
+    Local::Box button13 = Local::Box::Box({ 0.25f, 0.25f }, { -0.3f, -0.7f }, { 0.5f, 0.5f, 0.5f },"C");
+    Local::Box button14 = Local::Box::Box({ 0.25f, 0.25f }, { 0.0f, -0.7f }, { 0.5f, 0.5f, 0.5f }, "0");
+    Local::Box button15 = Local::Box::Box({ 0.25f, 0.25f }, { 0.3f, -0.7f }, { 0.5f, 0.5f, 0.5f }, "=");
+    Local::Box button16 = Local::Box::Box({ 0.25f, 0.25f }, { 0.6f, -0.7f }, { 0.5f, 0.5f, 0.5f }, "/");
+
+    Local::Box buttons[] = { button1, button2, button3, button4, button5, button6, button7, button8, button9, button10, button11, button12, button13, button14, button15, button16 };
     // Render loop
     while (!glfwWindowShouldClose(window)) {
         // Clear the screen
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         rect.Draw();
         rect2.Draw();
-        rect3.Draw();
-        rect4.Draw();
-        rect5.Draw();
-        rect6.Draw();
-        checkOpenGLError("Drawing rect");
 
+        button1.Draw();
+        button2.Draw();
+        button3.Draw();
+        button4.Draw();
+
+        button5.Draw();
+        button6.Draw();
+        button7.Draw();
+        button8.Draw();
+
+        button9.Draw();
+        button10.Draw();
+        button11.Draw();
+        button12.Draw();
+
+        button13.Draw();
+        button14.Draw();
+        button15.Draw();
+        button16.Draw();
+        checkOpenGLError("Drawing rect");
+        
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+        {
+            double xPos;
+            double yPos;
+            glfwGetCursorPos(window, &xPos, &yPos);
+
+            xPos = NormalizeXCoordinate(xPos);
+            yPos = NormalizeYCoordinate(yPos);
+            
+            for (auto button : buttons)
+            {
+                
+                
+                if ((xPos >= button.pos.X && xPos <= button.pos.X + button.size.X) && (yPos >= button.pos.Y && yPos <= button.pos.Y + button.size.Y))
+                {
+                    std::cout << button.Name << "\n";
+                }
+            }
+        }
         // Swap buffers and poll events
         glfwSwapBuffers(window);
         glfwPollEvents();
